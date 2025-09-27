@@ -42,7 +42,8 @@ def get_all_users():
 
 WAITING_FOR_MESSAGE = 1
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    add_user(update.message.chat_id)
+    user = update.effective_user
+    add_user(user.id, user.first_name or "", user.last_name or "", user.username or "")
     welcome_text = (
         "👋 Hello and welcome!\n\n"
         "This is an anonymous chat bot.\n"
