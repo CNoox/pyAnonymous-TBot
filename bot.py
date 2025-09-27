@@ -145,7 +145,7 @@ async def get_all_users_fun(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     if update.message.chat_id == ADMIN_ID:
-        users = get_all_users()
+        users = [u for u in get_all_users() if u != ADMIN_ID]
         text = "📋 User List:\n\n"
 
         for i in users:
