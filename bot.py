@@ -232,12 +232,6 @@ async def message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             print(f"{username}: voice")
         if gif:
             print(f"{username}: gif")
-        await context.bot.forward_message(
-            chat_id=ADMIN_ID,
-            from_chat_id=update.message.chat_id,
-            message_id=update.message.message_id,
-        )
-
         forwarded_msg = await context.bot.forward_message(
             chat_id=ADMIN_ID,
             from_chat_id=update.message.chat_id,
