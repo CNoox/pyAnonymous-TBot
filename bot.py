@@ -80,19 +80,14 @@ async def reply_to_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 try:
                     if update.message.photo:
                         photo = update.message.photo[-1]
-                        await context.bot.send_photo(chat_id=target_id, photo=photo)
-                    if update.message.sticker:
-                        await context.bot.send_sticker(chat_id=target_id, sticker=update.message.sticker)
-                    if update.message.video:
-                        await context.bot.send_video(chat_id=target_id, video=update.message.video)
-                    if update.message.animation:
-                        await context.bot.send_animation(chat_id=target_id, animation=update.message.animation)
-                    if update.message_reaction.new_reaction:
-                        await context.bot.send_message(
-                            chat_id=target_id,
-                            text=f"User {update.message_reaction.user.first_name} reacted: {update.message_reaction.new_reaction[0].EMOJI}"
-                        )
-                    if update.message.text:
+                        await context.bot.send_photo(chat_id=target_id, photo=photo.file_id)
+                    elif update.message.sticker:
+                        await context.bot.send_sticker(chat_id=target_id, sticker=update.message.sticker.file_id)
+                    elif update.message.video:
+                        await context.bot.send_video(chat_id=target_id, video=update.message.video.file_id)
+                    elif update.message.animation:
+                        await context.bot.send_animation(chat_id=target_id, animation=update.message.animation.file_id)
+                    elif update.message.text:
                         await context.bot.send_message(chat_id=target_id, text=update.message.text)
                     await update.message.reply_text("✅ Reply sent successfully.")
                 except Exception as e:
