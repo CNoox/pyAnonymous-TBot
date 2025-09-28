@@ -123,9 +123,7 @@ async def send_to_all_finish(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
     text = update.message.text
     if text != "Send To All" and text != "Get All Users":
-        users = get_all_users()
-        if 5803351280 in users:
-            users.remove(5803351280)
+        users = [u for u in get_all_users() if u != ADMIN_ID]
         sent, failed = 0, 0
         for uid in users:
             try:
@@ -158,7 +156,7 @@ async def get_all_users_fun(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     if update.message.chat_id == ADMIN_ID:
-        users = [u for u in get_all_users() if u != ADMIN_ID]
+        users = get_all_users()
         text = "📋 User List:\n\n"
 
         for i in users:
