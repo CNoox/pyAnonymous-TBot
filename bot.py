@@ -66,28 +66,41 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def reply_to_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if update.effective_user.id != ADMIN_ID:
-        return
+    if ADMIN_ID == update.message.chat_id:
+        if update.message.reply_to_message:
+            admin_msg_id = update.message.reply_to_message.message_id
+            conn = sqlite3.connect(DB_FILE)
+            c = conn.cursor()
+            c.execute("SELECT user_chat_id FROM replies_map WHERE admin_message_id=?", (admin_msg_id,))
+            row = c.fetchone()
+            conn.close()
 
-    if update.message.reply_to_message:
-        admin_msg_id = update.message.reply_to_message.message_id
-        conn = sqlite3.connect(DB_FILE)
-        c = conn.cursor()
-        c.execute("SELECT user_chat_id FROM replies_map WHERE admin_message_id=?", (admin_msg_id,))
-        row = c.fetchone()
-        conn.close()
-
-        if row:
-            target_id = row[0]
-            try:
-                await context.bot.send_message(chat_id=target_id, text=update.message.text)
-                await update.message.reply_text("✅ Reply sent successfully.")
-            except Exception as e:
-                await update.message.reply_text(f"⚠️ Error sending message: {e}")
+            if row:
+                target_id = row[0]
+                try:
+                    if update.message.photo:
+                        photo = update.message.photo[-1]
+                        await context.bot.send_photo(chat_id=target_id, photo=photo)
+                    if update.message.sticker:
+                        await context.bot.send_sticker(chat_id=target_id, sticker=update.message.sticker)
+                    if update.message.video:
+                        await context.bot.send_video(chat_id=target_id, video=update.message.video)
+                    if update.message.animation:
+                        await context.bot.send_animation(chat_id=target_id, animation=update.message.animation)
+                    if update.message_reaction.new_reaction:
+                        await context.bot.send_message(
+                            chat_id=target_id,
+                            text=f"User {update.message_reaction.user.first_name} reacted: {update.message_reaction.new_reaction[0].EMOJI}"
+                        )
+                    if update.message.text:
+                        await context.bot.send_message(chat_id=target_id, text=update.message.text)
+                    await update.message.reply_text("✅ Reply sent successfully.")
+                except Exception as e:
+                    await update.message.reply_text(f"⚠️ Error sending message: {e}")
+            else:
+                await update.message.reply_text("❌ Unable to find the user's ID.")
         else:
-            await update.message.reply_text("❌ Unable to find the user's ID.")
-    else:
-        await update.message.reply_text("❌ You need to reply to a user's message to send a reply.")
+            await update.message.reply_text("❌ You need to reply to a user's message to send a reply.")
 
 
 
@@ -139,7 +152,7 @@ async def get_all_users_fun(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.chat_id != ADMIN_ID:
         await context.bot.send_message(
             chat_id=update.message.chat_id,
-            text="✅ Received!",
+            text="Received!",
             reply_to_message_id=update.message.message_id
         )
         return
@@ -156,13 +169,12 @@ async def get_all_users_fun(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 uname = f"@{chat.username}" if chat.username else ""
                 fullname = f"{name} {lname}".strip()
 
-                text += f"👤 {fullname} {uname} — `{i}`\n"
+                text += f"👤 {fullname} {uname} — {i}\n"
 
             except Exception as e:
                 text += f"⚠️ {i} (Error fetching user info)\n"
 
-        await update.message.reply_text(text, parse_mode="Markdown")
-
+        await update.message.reply_text(text)
 
 
 async def help(update: Update,context: ContextTypes.DEFAULT_TYPE):
