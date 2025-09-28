@@ -19,6 +19,13 @@ def init_db():
             username TEXT
         )
     ''')
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS replies_map (
+            admin_message_id INTEGER PRIMARY KEY,
+            user_chat_id INTEGER NOT NULL
+        )
+    ''')
+
     conn.commit()
     conn.close()
 
