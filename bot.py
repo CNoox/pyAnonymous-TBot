@@ -1,4 +1,4 @@
-from telegram.ext import Application, MessageHandler, filters, ContextTypes,CommandHandler,ConversationHandler
+from telegram.ext import Application, MessageHandler, filters, ContextTypes, CommandHandler, ConversationHandler
 from telegram import Update
 from telegram import ReplyKeyboardMarkup
 import sqlite3
@@ -7,6 +7,7 @@ import os
 DB_FILE = "users.db"
 TOKEN = os.environ.get("BOT_TOKEN")
 ADMIN_ID = int(os.environ.get("ADMIN_ID"))
+
 
 def init_db():
     conn = sqlite3.connect(DB_FILE)
@@ -30,7 +31,6 @@ def init_db():
     conn.close()
 
 
-
 def add_user(chat_id, first_name, last_name, username):
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
@@ -38,6 +38,7 @@ def add_user(chat_id, first_name, last_name, username):
               (chat_id, first_name, last_name, username))
     conn.commit()
     conn.close()
+
 
 def get_all_users():
     conn = sqlite3.connect(DB_FILE)
@@ -47,7 +48,10 @@ def get_all_users():
     conn.close()
     return users
 
+
 WAITING_FOR_MESSAGE = 1
+
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     add_user(user.id, user.first_name or "", user.last_name or "", user.username or "")
@@ -61,9 +65,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "- You can interact freely without worrying about your privacy.\n\n"
         "Use the buttons below or type a command to get started. ✅"
     )
-    keyboard = [["Send To All"],["Get All Users"]] if update.message.chat_id == ADMIN_ID else [["/help", "/home"]]
+    keyboard = [["Send To All"], ["Get All Users"]] if update.message.chat_id == ADMIN_ID else [["/help", "/home"]]
 
-    keyboard_reply = ReplyKeyboardMarkup(keyboard,resize_keyboard=True)
+    keyboard_reply = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
     await context.bot.sendMessage(
         chat_id=update.message.chat_id,
         text=welcome_text,
@@ -93,7 +97,6 @@ async def reply_to_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 await update.message.reply_text("❌ Unable to find the user's ID.")
         else:
             await update.message.reply_text("❌ You need to reply to a user's message to send a reply.")
-
 
 
 async def send_to_all_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -126,7 +129,7 @@ async def send_to_all_finish(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
         keyboard = [['Send To All', 'Get All Users']]
         keyboard_reply = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
-        await update.message.reply_text(f"✅ Sent to {sent} users | ❌ Failed: {failed}",reply_markup=keyboard_reply)
+        await update.message.reply_text(f"✅ Sent to {sent} users | ❌ Failed: {failed}", reply_markup=keyboard_reply)
         return ConversationHandler.END
 
 
@@ -167,7 +170,7 @@ async def get_all_users_fun(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(text)
 
 
-async def help(update: Update,context: ContextTypes.DEFAULT_TYPE):
+async def help(update: Update, context: ContextTypes.DEFAULT_TYPE):
     help_text = (
         "🤖 **Bot Help & Instructions**\n\n"
         "Welcome! This bot is designed to help you with various tasks quickly and easily.\n\n"
@@ -178,10 +181,11 @@ async def help(update: Update,context: ContextTypes.DEFAULT_TYPE):
         "If you have any questions or feedback, feel free to ask here! ✅"
     )
     await context.bot.send_message(chat_id=update.message.chat_id,
-                                  text=help_text,
-                                  reply_to_message_id=update.message.message_id)
+                                   text=help_text,
+                                   reply_to_message_id=update.message.message_id)
 
-async def home(update :Update,context :ContextTypes.DEFAULT_TYPE):
+
+async def home(update: Update, context: ContextTypes.DEFAULT_TYPE):
     home_text = (
         "👋 Hello and welcome!\n\n"
         "This is an anonymous chat bot.\n"
@@ -193,11 +197,12 @@ async def home(update :Update,context :ContextTypes.DEFAULT_TYPE):
         "Use the buttons below or type a command to get started. ✅"
     )
     keyboard = [
-        ['/help','/home']
+        ['/help', '/home']
     ]
-    keyboard_reply = ReplyKeyboardMarkup(keyboard,resize_keyboard=True)
+    keyboard_reply = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
     await update.message.reply_text(text=home_text,
                                     reply_markup=keyboard_reply)
+
 
 async def message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
@@ -214,8 +219,8 @@ async def message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         gif = update.message.animation
 
         await context.bot.send_message(chat_id=update.message.chat_id,
-                                      text="Received!",
-                                      reply_to_message_id=update.message.message_id)
+                                       text="Received!",
+                                       reply_to_message_id=update.message.message_id)
 
         if text:
             print(f"{username}: {text}")
@@ -279,8 +284,9 @@ async def message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 await update.message.reply_text("❌ Unable to find the user's ID.")
         else:
             await context.bot.send_message(chat_id=update.message.chat_id,
-                                          text="❌ You need to reply to a user's message to send a reply.",
-                                          reply_to_message_id=update.message.message_id)
+                                           text="❌ You need to reply to a user's message to send a reply.",
+                                           reply_to_message_id=update.message.message_id)
+
 
 def main():
     conv1 = ConversationHandler(
@@ -292,13 +298,15 @@ def main():
     )
     init_db()
     app = Application.builder().token(TOKEN).build()
-    app.add_handler(CommandHandler('start',start))
-    app.add_handler(CommandHandler('help',help))
-    app.add_handler(CommandHandler('home',home))
+    app.add_handler(CommandHandler('start', start))
+    app.add_handler(CommandHandler('help', help))
+    app.add_handler(CommandHandler('home', home))
     app.add_handler(conv1)
     app.add_handler(MessageHandler(filters.Regex("^Get All Users$"), get_all_users_fun))
     app.add_handler(MessageHandler(filters.REPLY & filters.TEXT, reply_to_user))
-    app.add_handler(MessageHandler(filters.ALL,message_handler))
+    app.add_handler(MessageHandler(filters.ALL, message_handler))
     app.run_polling()
+
+
 if __name__ == "__main__":
     main()
