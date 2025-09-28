@@ -263,12 +263,16 @@ async def message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     if update.message.photo:
                         photo = update.message.photo[-1]
                         await context.bot.send_photo(chat_id=target_id, photo=photo.file_id)
+                        await update.message.reply_text("✅ Reply sent successfully.")
                     elif update.message.sticker:
                         await context.bot.send_sticker(chat_id=target_id, sticker=update.message.sticker.file_id)
+                        await update.message.reply_text("✅ Reply sent successfully.")
                     elif update.message.video:
                         await context.bot.send_video(chat_id=target_id, video=update.message.video.file_id)
+                        await update.message.reply_text("✅ Reply sent successfully.")
                     elif update.message.animation:
                         await context.bot.send_animation(chat_id=target_id, animation=update.message.animation.file_id)
+                        await update.message.reply_text("✅ Reply sent successfully.")
                 except Exception as e:
                     await update.message.reply_text(f"⚠️ Error sending message: {e}")
             else:
